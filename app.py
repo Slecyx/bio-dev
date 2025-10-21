@@ -4,23 +4,23 @@ import time
 
 st.set_page_config(page_title="🌱 Sanal Fotosentez Deneyi", page_icon="🌿", layout="centered")
 
-# Başlık ve açıklama
+# Başlık
 st.title("🌿 Sanal Fotosentez Deneyi")
 st.markdown(
-    "Fotosentezin gerçekleşmesi için gerekli koşulları ayarla ve bitkinin tepkisini gözlemle! 🌞💧🌬️"
+    "Bitkilerin nasıl fotosentez yaptığını gözlemle! 🌞💧🌬️\n\n"
+    "Aşağıdaki koşulları ayarlayarak, bitkinin oksijen ve glikoz üretimini inceleyebilirsin."
 )
 
 # --- Kullanıcı girdileri ---
-st.header("Deney Koşullarını Ayarla")
-isik_seviyesi = st.slider("Işık şiddeti (%)", 0, 100, 50)
-su_miktari = st.slider("Su miktarı (%)", 0, 100, 50)
-co2_miktari = st.slider("CO2 miktarı (%)", 0, 100, 50)
+st.header("🔧 Deney Koşullarını Belirle")
+isik_seviyesi = st.slider("Işık şiddeti (%)", 0, 100, 70)
+su_miktari = st.slider("Su miktarı (%)", 0, 100, 60)
+co2_miktari = st.slider("CO₂ miktarı (%)", 0, 100, 80)
 
 # --- Fonksiyonlar ---
 def fotosentez_miktari(isik, su, co2):
-    """Koşullara göre fotosentez miktarını hesaplar."""
-    toplam = (isik * 0.4) + (su * 0.3) + (co2 * 0.3)
-    return toplam
+    """Fotosentez miktarını hesaplar."""
+    return (isik * 0.4) + (su * 0.3) + (co2 * 0.3)
 
 def urun_oranlari(toplam):
     """Oksijen ve glikoz oranlarını hesaplar."""
@@ -29,58 +29,76 @@ def urun_oranlari(toplam):
     return oksijen, glikoz
 
 def eksik_ipucu(isik, su, co2):
-    """Eksik koşullar için ipuçları verir."""
+    """Eksik koşullar için açıklama verir."""
     eksikler = []
-    ipucu = {
-        "Işık yok": "Bitkinin güneş ışığına ihtiyacı var ☀️",
-        "Su yok": "Su olmadan fotosentez yapamaz 💧",
-        "Karbondioksit yok": "Hava olmadan fotosentez gerçekleşmez 🌬️"
-    }
     if isik == 0:
-        eksikler.append(ipucu["Işık yok"])
+        eksikler.append("☀️ **Işık eksik!** Bitki enerji üretemez.")
     if su == 0:
-        eksikler.append(ipucu["Su yok"])
+        eksikler.append("💧 **Su eksik!** Köklerden besin taşınamaz.")
     if co2 == 0:
-        eksikler.append(ipucu["Karbondioksit yok"])
+        eksikler.append("🌬️ **CO₂ eksik!** Bitki karbon alamaz.")
     return eksikler
 
 # --- Deneyi başlat ---
 if st.button("🌱 Deneyi Başlat"):
+    st.subheader("🔬 Fotosentez Süreci Başlatılıyor...")
+
     toplam_uretimi = fotosentez_miktari(isik_seviyesi, su_miktari, co2_miktari)
-    
+
     if toplam_uretimi > 0:
-        st.success(f"✅ Fotosentez gerçekleşti! Toplam üretim: {int(toplam_uretimi)}%")
         oksijen, glikoz = urun_oranlari(toplam_uretimi)
-        
-        # Metric ile hızlı gösterim
+
+        # Denklemi göster
+        st.markdown("---")
+        st.latex(r"6CO_2 + 6H_2O + Işık \longrightarrow C_6H_{12}O_6 + 6O_2")
+        st.caption("Fotosentez Denklemi: Karbondioksit + Su + Işık → Glikoz + Oksijen")
+
+        # Girdiler - Çıktılar tablosu
+        st.markdown("### ⚙️ Girdiler ve Çıktılar")
         col1, col2 = st.columns(2)
-        col1.metric("Oksijen Üretimi", f"{int(oksijen)}%")
-        col2.metric("Glikoz Üretimi", f"{int(glikoz)}%")
-        
-        # Animasyon
-        st.write("Fotosentez süreci gözlemleniyor...")
+
+        with col1:
+            st.markdown("#### 🔹 Giren Maddeler")
+            st.write(f"☀️ Işık: **{isik_seviyesi}%**")
+            st.write(f"💧 Su (H₂O): **{su_miktari}%**")
+            st.write(f"🌬️ Karbondioksit (CO₂): **{co2_miktari}%**")
+
+        with col2:
+            st.markdown("#### 🔸 Çıkan Maddeler")
+            st.write(f"🌿 Glikoz (C₆H₁₂O₆): **{int(glikoz)}%**")
+            st.write(f"🍃 Oksijen (O₂): **{int(oksijen)}%**")
+
+        # Animasyon (ilerleme çubuğu)
+        st.markdown("---")
+        st.write("🌞 Bitki fotosentez yapıyor...")
         progress_bar = st.progress(0)
         for i in range(101):
-            time.sleep(0.01)  # Daha hızlı ve akıcı
+            time.sleep(0.015)
             progress_bar.progress(i)
-        
-        # Pie chart
-        labels = ['Oksijen', 'Glikoz']
+
+        # Sonuç
+        st.success(f"✅ Fotosentez tamamlandı! Toplam üretim: **{int(toplam_uretimi)}%**")
+
+        # Grafik - ürün oranları
+        labels = ['Oksijen (O₂)', 'Glikoz (C₆H₁₂O₆)']
         values = [oksijen, glikoz]
-        colors = ['#7CFC00', '#32CD32']
+        colors = ['#7CFC00', '#2E8B57']
+
         fig, ax = plt.subplots()
         ax.pie(values, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90, shadow=True)
-        ax.set_title("Fotosentez Ürün Dağılımı")
+        ax.set_title("🌿 Fotosentez Ürün Dağılımı")
         st.pyplot(fig)
-        
+
+        # Bilgilendirici not
+        st.info("🔍 Bitkiler, ürettikleri glikozu enerji olarak kullanır ve oksijeni atmosfere salar.")
+
     else:
-        st.error("❌ Fotosentez gerçekleşmedi.")
-        eksikler = eksik_ipucu(isik_seviyesi, su_miktari, co2_miktari)
-        for e in eksikler:
-            st.info(e)
-        # Daha açıklayıcı GIF
+        st.error("❌ Fotosentez gerçekleşmedi!")
+        for e in eksik_ipucu(isik_seviyesi, su_miktari, co2_miktari):
+            st.warning(e)
+
         st.image(
             "https://upload.wikimedia.org/wikipedia/commons/3/3d/Photosynthesis.gif",
-            caption="Fotosentez süreci",
+            caption="Fotosentez gerçekleşmesi için tüm koşullar gerekli 🌱",
             use_column_width=True
         )
